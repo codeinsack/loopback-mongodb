@@ -27,9 +27,7 @@ module.exports = function (Person) {
     returns: { arg: "data" },
     http: { path: "/female", verb: "get" },
   });
-};
 
-module.exports = function (Person) {
   Person.getGroupedByState = async () => {
     const db = await dbConnect();
     const collection = db.collection("Person");
@@ -51,9 +49,7 @@ module.exports = function (Person) {
     returns: { arg: "data" },
     http: { path: "/grouped-by-state", verb: "get" },
   });
-};
 
-module.exports = function (Person) {
   Person.getFullNames = async () => {
     const db = await dbConnect();
     const collection = db.collection("Person");
@@ -93,5 +89,46 @@ module.exports = function (Person) {
   Person.remoteMethod("getFullNames", {
     returns: { arg: "data" },
     http: { path: "/full-names", verb: "get" },
+  });
+
+  Person.getCoordinates = async () => {
+    const db = await dbConnect();
+    const collection = db.collection("Person");
+    const pipeline = [
+      {
+        $project: {
+          _id: 0,
+          email: 1,
+          location: {
+            type: "Point",
+            coordinates: [
+              {
+                $convert: {
+                  input: "$location.coordinates.longitude",
+                  to: "double",
+                  onError: 0.0,
+                  onNull: 0.0,
+                },
+              },
+              {
+                $convert: {
+                  input: "$location.coordinates.latitude",
+                  to: "double",
+                  onError: 0.0,
+                  onNull: 0.0,
+                },
+              },
+            ],
+          },
+        },
+      },
+    ];
+    const people = await collection.aggregate(pipeline);
+    return people.toArray();
+  };
+
+  Person.remoteMethod("getCoordinates", {
+    returns: { arg: "data" },
+    http: { path: "/coordinates", verb: "get" },
   });
 };
