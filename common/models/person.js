@@ -138,7 +138,7 @@ module.exports = function (Person) {
     const pipeline = [
       {
         $project: {
-          birthday: { $convert: { input: "$dob.date", to: "date" } },
+          birthday: { $toDate: "$dob.date" },
           age: "$dob.age",
         },
       },
