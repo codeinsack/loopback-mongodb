@@ -52,3 +52,26 @@ module.exports = function (Person) {
     http: { path: "/grouped-by-state", verb: "get" },
   });
 };
+
+module.exports = function (Person) {
+  Person.getFullNames = async () => {
+    const db = await dbConnect();
+    const collection = db.collection("Person");
+    const pipeline = [
+      {
+        $project: {
+          _id: 0,
+          gender: 1,
+          fullName: { $concat: ["Hello", "World!!"] },
+        },
+      },
+    ];
+    const female = await collection.aggregate(pipeline);
+    return female.toArray();
+  };
+
+  Person.remoteMethod("getFullNames", {
+    returns: { arg: "data" },
+    http: { path: "/full-names", verb: "get" },
+  });
+};
