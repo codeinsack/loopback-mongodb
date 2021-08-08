@@ -18,14 +18,36 @@ module.exports = function (Person) {
   Person.getFemale = async () => {
     const db = await dbConnect();
     const collection = db.collection("Person");
-    const female = await collection.aggregate([
-      { $match: { gender: "female" } },
-    ]);
+    const pipeline = [{ $match: { gender: "female" } }];
+    const female = await collection.aggregate(pipeline);
     return female.toArray();
   };
 
   Person.remoteMethod("getFemale", {
     returns: { arg: "data" },
     http: { path: "/female", verb: "get" },
+  });
+};
+
+module.exports = function (Person) {
+  Person.getGroupedByState = async () => {
+    const db = await dbConnect();
+    const collection = db.collection("Person");
+    const pipeline = [
+      { $match: { gender: "female" } },
+      {
+        $group: {
+          _id: { state: "$location.state" },
+          totalPersons: { $sum: 1 },
+        },
+      },
+    ];
+    const female = await collection.aggregate(pipeline);
+    return female.toArray();
+  };
+
+  Person.remoteMethod("getGroupedByState", {
+    returns: { arg: "data" },
+    http: { path: "/grouped-by-state", verb: "get" },
   });
 };
