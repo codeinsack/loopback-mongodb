@@ -131,4 +131,24 @@ module.exports = function (Person) {
     returns: { arg: "data" },
     http: { path: "/coordinates", verb: "get" },
   });
+
+  Person.getBirthday = async () => {
+    const db = await dbConnect();
+    const collection = db.collection("Person");
+    const pipeline = [
+      {
+        $project: {
+          birthday: { $convert: { input: "$dob.date", to: "date" } },
+          age: "$dob.age",
+        },
+      },
+    ];
+    const people = await collection.aggregate(pipeline);
+    return people.toArray();
+  };
+
+  Person.remoteMethod("getBirthday", {
+    returns: { arg: "data" },
+    http: { path: "/birthday", verb: "get" },
+  });
 };
