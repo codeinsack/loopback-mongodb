@@ -41,6 +41,7 @@ module.exports = function (Person) {
           totalPersons: { $sum: 1 },
         },
       },
+      { $sort: { totalPersons: -1 } },
     ];
     const female = await collection.aggregate(pipeline);
     return female.toArray();
