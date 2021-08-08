@@ -62,12 +62,32 @@ module.exports = function (Person) {
         $project: {
           _id: 0,
           gender: 1,
-          fullName: { $concat: ["Hello", "World!!"] },
+          fullName: {
+            $concat: [
+              { $toUpper: { $substrCP: ["$name.first", 0, 1] } },
+              {
+                $substrCP: [
+                  "$name.first",
+                  1,
+                  { $subtract: [{ $strLenCP: "$name.first" }, 1] },
+                ],
+              },
+              " ",
+              { $toUpper: { $substrCP: ["$name.last", 0, 1] } },
+              {
+                $substrCP: [
+                  "$name.last",
+                  1,
+                  { $subtract: [{ $strLenCP: "$name.last" }, 1] },
+                ],
+              },
+            ],
+          },
         },
       },
     ];
-    const female = await collection.aggregate(pipeline);
-    return female.toArray();
+    const people = await collection.aggregate(pipeline);
+    return people.toArray();
   };
 
   Person.remoteMethod("getFullNames", {
