@@ -42,5 +42,9 @@
   "Pupil": {
     "dataSource": "db",
     "public": true
+  },
+  "CoordinatedPerson": {
+    "dataSource": "db",
+    "public": true
   }
 }

@@ -124,7 +124,7 @@ module.exports = function (Person) {
       },
       // write a new collection
       // {
-      //   $out: "TransformedPersons",
+      //   $out: "CoordinatedPerson",
       // },
     ];
     const people = await collection.aggregate(pipeline);
