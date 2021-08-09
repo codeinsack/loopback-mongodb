@@ -90,4 +90,29 @@ module.exports = function (Pupil) {
     returns: { arg: "data" },
     http: { path: "/filtered-exam-scores", verb: "get" },
   });
+
+  Pupil.getHighestScore = async () => {
+    const db = await dbConnect();
+    const collection = db.collection("Pupil");
+    const pipeline = [
+      { $unwind: "$examScores" },
+      { $project: { _id: 1, name: 1, age: 1, score: "$examScores.score" } },
+      { $sort: { score: -1 } },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          maxScore: { $max: "$score" },
+        },
+      },
+      { $sort: { maxScore: -1 } },
+    ];
+    const pupils = await collection.aggregate(pipeline);
+    return pupils.toArray();
+  };
+
+  Pupil.remoteMethod("getHighestScore", {
+    returns: { arg: "data" },
+    http: { path: "/highest-score", verb: "get" },
+  });
 };
