@@ -160,4 +160,52 @@ module.exports = function (Person) {
     returns: { arg: "data" },
     http: { path: "/birthday", verb: "get" },
   });
+
+  Person.getBucket = async () => {
+    const db = await dbConnect();
+    const collection = db.collection("Person");
+    const pipeline = [
+      {
+        $bucket: {
+          groupBy: "$dob.age",
+          boundaries: [18, 30, 40, 50, 60, 120],
+          output: {
+            numPersons: { $sum: 1 },
+            averageAge: { $avg: "$dob.age" },
+          },
+        },
+      },
+    ];
+    const people = await collection.aggregate(pipeline);
+    return people.toArray();
+  };
+
+  Person.remoteMethod("getBucket", {
+    returns: { arg: "data" },
+    http: { path: "/bucket", verb: "get" },
+  });
+
+  Person.getBucketAuto = async () => {
+    const db = await dbConnect();
+    const collection = db.collection("Person");
+    const pipeline = [
+      {
+        $bucketAuto: {
+          groupBy: "$dob.age",
+          buckets: 5,
+          output: {
+            numPersons: { $sum: 1 },
+            averageAge: { $avg: "$dob.age" },
+          },
+        },
+      },
+    ];
+    const people = await collection.aggregate(pipeline);
+    return people.toArray();
+  };
+
+  Person.remoteMethod("getBucketAuto", {
+    returns: { arg: "data" },
+    http: { path: "/bucket-auto", verb: "get" },
+  });
 };
