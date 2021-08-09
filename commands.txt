@@ -1,3 +1,2 @@
 sudo service mongod start
 mongoimport array-data.json -d world -c Pupil --jsonArray
-
