@@ -208,4 +208,28 @@ module.exports = function (Person) {
     returns: { arg: "data" },
     http: { path: "/bucket-auto", verb: "get" },
   });
+
+  Person.getPaginated = async () => {
+    const db = await dbConnect();
+    const collection = db.collection("Person");
+    const pipeline = [
+      {
+        $project: {
+          _id: 0,
+          name: { $concat: ["$name.first", " ", "$name.last"] },
+          birthdate: { $toDate: "$dob.date" },
+        },
+      },
+      { $sort: { birthdate: 1 } },
+      { $skip: 10 },
+      { $limit: 10 },
+    ];
+    const people = await collection.aggregate(pipeline);
+    return people.toArray();
+  };
+
+  Person.remoteMethod("getPaginated", {
+    returns: { arg: "data" },
+    http: { path: "/paginated", verb: "get" },
+  });
 };
