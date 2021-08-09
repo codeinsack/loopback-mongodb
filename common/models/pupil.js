@@ -63,4 +63,31 @@ module.exports = function (Pupil) {
     returns: { arg: "data" },
     http: { path: "/scores-number", verb: "get" },
   });
+
+  Pupil.getFilteredExamScores = async () => {
+    const db = await dbConnect();
+    const collection = db.collection("Pupil");
+    const pipeline = [
+      {
+        $project: {
+          _id: 0,
+          name: 1,
+          examScores: {
+            $filter: {
+              input: "$examScores",
+              as: "sc",
+              cond: { $gt: ["$$sc.score", 60] },
+            },
+          },
+        },
+      },
+    ];
+    const pupils = await collection.aggregate(pipeline);
+    return pupils.toArray();
+  };
+
+  Pupil.remoteMethod("getFilteredExamScores", {
+    returns: { arg: "data" },
+    http: { path: "/filtered-exam-scores", verb: "get" },
+  });
 };
