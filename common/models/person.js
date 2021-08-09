@@ -122,6 +122,10 @@ module.exports = function (Person) {
           },
         },
       },
+      // write a new collection
+      // {
+      //   $out: "TransformedPersons",
+      // },
     ];
     const people = await collection.aggregate(pipeline);
     return people.toArray();
